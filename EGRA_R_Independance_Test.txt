@@ -1,0 +1,277 @@
+# inputing SENSE-EGRA dataset
+data2 <- read.csv(file="C:\\Users\\USER\\Desktop\\PROPOSAL\\EGRA1.csv", header=TRUE)
+
+# Removing NAs
+data <- na.omit(data2) 	# omitting area where there are NAs
+
+# Removing Students ID numbers
+data <- subset(data, select = -c(Std_ID))
+
+# inputing daggity libraries
+library( dagitty )
+library( lavaan )
+
+# Developing a DAG for the dataset
+# X is just a variable container, so during testing X should be replaced with school, Age, Gender etc,
+myDAG <- dagitty( 'dag {
+	X-> Treatment
+	X -> LI_2
+	LI_2 -> LI_1
+	LI_2 -> LI_3
+	Treatment -> LI_1
+	LI_2 -> LI_1
+	LI_1 -> LI_3
+	LI_2 -> LI_3
+	}' )
+
+# Model testing 
+localTests(myDAG, data=data, type='cis.chisq')
+
+# replace X for each variable for the DAG and use it as argument in plotLocalTestResults to plot gragh for each variable conditional independence
+plotLocalTestResults(localTests(myDAG, data=data))
+
+# for X=State DAG
+myDAG1 <- dagitty( 'dag {
+	State -> Treatment
+	State -> LI_2
+	LI_2 -> LI_1
+	LI_2 -> LI_3
+	Treatment -> LI_1
+	LI_2 -> LI_1
+	LI_1 -> LI_3
+	LI_2 -> LI_3
+	}' )
+
+# Model testing for X=State
+# Testing implied conditional independencies
+impliedConditionalIndependencies(myDAG1)
+plot (myDAG1)
+
+localTests(myDAG1, data=data, type='cis.chisq')
+plotLocalTestResults(localTests(myDAG1, data=data))
+
+
+# for X=LGA DAG
+myDAG2 <- dagitty( 'dag {
+	LGA -> Treatment
+	LGA -> LI_2
+	LI_2 -> LI_1
+	LI_2 -> LI_3
+	Treatment -> LI_1
+	LI_2 -> LI_1
+	LI_1 -> LI_3
+	LI_2 -> LI_3
+	}' )
+# Model testing for X=LGA
+# Testing implied conditional independencies
+localTests(myDAG2, data=data, type='cis.chisq')
+plotLocalTestResults(localTests(myDAG2, data=data))
+
+# for X=School DAG
+myDAG3 <- dagitty( 'dag {
+	School -> Treatment
+	School -> LI_2
+	LI_2 -> LI_1
+	LI_2 -> LI_3
+	Treatment -> LI_1
+	LI_2 -> LI_1
+	LI_1 -> LI_3
+	LI_2 -> LI_3
+	}' )
+# Model testing for X=School
+# Testing implied conditional independencies
+localTests(myDAG3, data=data, type='cis.chisq')
+plotLocalTestResults(localTests(myDAG3, data=data))
+
+# for X=Gender DAG
+myDAG4 <- dagitty( 'dag {
+	Gender -> Treatment
+	Gender -> LI_2
+	LI_2 -> LI_1
+	LI_2 -> LI_3
+	Treatment -> LI_1
+	LI_2 -> LI_1
+	LI_1 -> LI_3
+	LI_2 -> LI_3
+	}' )
+# Model testing for X=Gender
+# Testing implied conditional independencies
+localTests(myDAG4, data=data, type='cis.chisq')
+plotLocalTestResults(localTests(myDAG4, data=data))
+
+# for X=Age DAG
+myDAG5 <- dagitty( 'dag {
+	Age -> Treatment
+	Age -> LI_2
+	LI_2 -> LI_1
+	LI_2 -> LI_3
+	Treatment -> LI_1
+	LI_2 -> LI_1
+	LI_1 -> LI_3
+	LI_2 -> LI_3
+	}' )
+# Model testing for X=Age
+# Testing implied conditional independencies
+localTests(myDAG5, data=data, type='cis.chisq')
+plotLocalTestResults(localTests(myDAG5, data=data))
+
+# for X=Q4 DAG
+myDAG6 <- dagitty( 'dag {
+	Q4 -> Treatment
+	Q4 -> LI_2
+	LI_2 -> LI_1
+	LI_2 -> LI_3
+	Treatment -> LI_1
+	LI_2 -> LI_1
+	LI_1 -> LI_3
+	LI_2 -> LI_3
+	}' )
+# Model testing for X=Q4
+# Testing implied conditional independencies
+localTests(myDAG6, data=data, type='cis.chisq')
+plotLocalTestResults(localTests(myDAG6, data=data))
+
+# for X=Q5 DAG
+myDAG7 <- dagitty( 'dag {
+	Q5 -> Treatment
+	Q5 -> LI_2
+	LI_2 -> LI_1
+	LI_2 -> LI_3
+	Treatment -> LI_1
+	LI_2 -> LI_1
+	LI_1 -> LI_3
+	LI_2 -> LI_3
+	}' )
+# Model testing for X=Q5
+# Testing implied conditional independencies
+localTests(myDAG7, data=data, type='cis.chisq')
+plotLocalTestResults(localTests(myDAG7, data=data))
+
+
+# for X=Q6_0 DAG
+myDAG8 <- dagitty( 'dag {
+	Q6_0 -> Treatment
+	Q6_0 -> LI_2
+	LI_2 -> LI_1
+	LI_2 -> LI_3
+	Treatment -> LI_1
+	LI_2 -> LI_1
+	LI_1 -> LI_3
+	LI_2 -> LI_3
+	}' )
+# Model testing for X=Q6_0
+# Testing implied conditional independencies
+localTests(myDAG8, data=data, type='cis.chisq')
+plotLocalTestResults(localTests(myDAG8, data=data))
+
+# for X=Q6_1 DAG
+myDAG9 <- dagitty( 'dag {
+	Q6_1 -> Treatment
+	Q6_1 -> LI_2
+	LI_2 -> LI_1
+	LI_2 -> LI_3
+	Treatment -> LI_1
+	LI_2 -> LI_1
+	LI_1 -> LI_3
+	LI_2 -> LI_3
+	}' )
+# Model testing for X=Q6_1
+# Testing implied conditional independencies
+localTests(myDAG9, data=data, type='cis.chisq')
+plotLocalTestResults(localTests(myDAG9, data=data))
+
+# for X=Q6_2 DAG
+myDAG10 <- dagitty( 'dag {
+	Q6_2 -> Treatment
+	Q6_2 -> LI_2
+	LI_2 -> LI_1
+	LI_2 -> LI_3
+	Treatment -> LI_1
+	LI_2 -> LI_1
+	LI_1 -> LI_3
+	LI_2 -> LI_3
+	}' )
+# Model testing for X=Q6_2
+# Testing implied conditional independencies
+localTests(myDAG10, data=data, type='cis.chisq')
+plotLocalTestResults(localTests(myDAG10, data=data))
+
+# for X=Q6_3 DAG
+myDAG11 <- dagitty( 'dag {
+	Q6_3 -> Treatment
+	Q6_3 -> LI_2
+	LI_2 -> LI_1
+	LI_2 -> LI_3
+	Treatment -> LI_1
+	LI_2 -> LI_1
+	LI_1 -> LI_3
+	LI_2 -> LI_3
+	}' )
+# Model testing for X=Q6_3
+# Testing implied conditional independencies
+localTests(myDAG11, data=data, type='cis.chisq')
+plotLocalTestResults(localTests(myDAG11, data=data))
+
+# for X=Q7 DAG
+myDAG12 <- dagitty( 'dag {
+	Q7 -> Treatment
+	Q7 -> LI_2
+	LI_2 -> LI_1
+	LI_2 -> LI_3
+	Treatment -> LI_1
+	LI_2 -> LI_1
+	LI_1 -> LI_3
+	LI_2 -> LI_3
+	}' )
+# Model testing for X=Q7
+# Testing implied conditional independencies
+localTests(myDAG12, data=data, type='cis.chisq')
+plotLocalTestResults(localTests(myDAG12, data=data))
+
+# for X=Q8 DAG
+myDAG13 <- dagitty( 'dag {
+	Q8 -> Treatment
+	Q8 -> LI_2
+	LI_2 -> LI_1
+	LI_2 -> LI_3
+	Treatment -> LI_1
+	LI_2 -> LI_1
+	LI_1 -> LI_3
+	LI_2 -> LI_3
+	}' )
+# Model testing for X=Q8
+# Testing implied conditional independencies
+localTests(myDAG13, data=data, type='cis.chisq')
+plotLocalTestResults(localTests(myDAG13, data=data))
+
+# for X=Q9 DAG
+myDAG14 <- dagitty( 'dag {
+	Q9 -> Treatment
+	Q9 -> LI_2
+	LI_2 -> LI_1
+	LI_2 -> LI_3
+	Treatment -> LI_1
+	LI_2 -> LI_1
+	LI_1 -> LI_3
+	LI_2 -> LI_3
+	}' )
+# Model testing for X=Q9
+# Testing implied conditional independencies
+localTests(myDAG14, data=data, type='cis.chisq')
+plotLocalTestResults(localTests(myDAG14, data=data))
+
+# for X=Q10 DAG
+myDAG15 <- dagitty( 'dag {
+	Q10 -> Treatment
+	Q10 -> LI_2
+	LI_2 -> LI_1
+	LI_2 -> LI_3
+	Treatment -> LI_1
+	LI_2 -> LI_1
+	LI_1 -> LI_3
+	LI_2 -> LI_3
+	}' )
+# Model testing for X=Q10
+# Testing implied conditional independencies
+localTests(myDAG15, data=data, type='cis.chisq')
+plotLocalTestResults(localTests(myDAG15, data=data))
