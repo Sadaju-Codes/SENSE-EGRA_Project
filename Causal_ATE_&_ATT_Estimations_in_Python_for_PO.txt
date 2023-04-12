@@ -1,0 +1,66 @@
+# importing the required libraries
+import pandas as pd
+import numpy as np
+
+# importing EGRA dataset
+df = pd.read_csv("EGRA1.csv")
+
+# viewing EGRA dataset
+df.head(2)
+
+# finding out columns with NAs
+df.isnull().sum() 
+
+# dropping NAs from the dataset
+data = df.dropna() 
+
+# double checking to ensure NAs are dropped
+data.isnull().sum() 
+
+# identifying the outcome variable
+Y = data['LI_3'].values
+
+# identifying the covariates
+X = data.drop(['Treatment', 'Std_ID', 'LI_3'], axis=1).values
+
+# viewing the covariates
+X
+
+# identifying the treatment variable
+D = data['Treatment'].values
+
+# importing the Causalinference library
+from causalinference import CausalModel
+
+# Instantiating our SCM from the CausalModel class
+model = CausalModel(Y, D, X)
+
+# Getting summary from our model
+print(model.summary_stats) 
+
+# causl estimate using OLS estimator
+model.est_via_ols(adj=1)
+print(model.estimates)
+
+# estimating propensity scores from our model
+model.est_propensity_s()
+print(model.propensity)
+
+#trimming propensity scores outliers
+model.trim() 
+model.cutoff
+
+#summary of trimmed propensity scores
+print(model.summary_stats)
+
+# stratifying samples
+model.stratify_s() 
+print(model.strata)
+
+# causal estimate using OLS, PSW, PSS(blocking), and PSM estimators together
+model.est_via_ols(adj=1)
+model.est_via_weighting()
+model.est_via_blocking()
+model.est_via_matching(bias_adj=True)
+print(model.estimates)
+
