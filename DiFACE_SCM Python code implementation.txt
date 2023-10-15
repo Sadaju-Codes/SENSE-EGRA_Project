@@ -1,0 +1,100 @@
+# importing libraries 
+
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn import preprocessing, neighbors, svm
+from sklearn.naive_bayes import GaussianNB
+import dice_ml
+from sklearn.metrics import f1_score, accuracy_score
+
+# importing the SENSE-EGRA dataset
+df = pd.read_csv("EGRA1.csv") 
+
+# checking columns for NAs
+df.isnull().sum() 
+
+# dropping NAs columns from the dataset
+data = df.dropna() 
+
+# droping students' ID, and other infeasible columns from the dataset (DiFACE-SCM Constraints)
+df=data.drop(['State','LGA','School', 'Std_ID','Gender','Age','LI_1','LI_2'], axis=1) 
+
+# creating a Binary class list for the outcome variable LI_3
+std_grade = [] 
+
+for LI_3 in df['LI_3']:
+    if LI_3 <=39:
+        std_grade.append('F')
+      
+    elif LI_3>=40:
+        std_grade.append('P')
+
+# replacing the outcome variable with the Binary class category created
+df['LI_3']=std_grade 
+
+# creating histogram to visualize all the variables
+import matplotlib.pyplot as plt
+columns=df.columns 
+for col in columns:
+    print('col: ', col)
+    df[col].hist()
+    plt.show()
+
+# binarizing the outcome variable
+Y =df['LI_3'].replace({'F': 0, 'P': 1}) 
+
+# Creating inputs variables by droping columns with outcome variable
+X =df.drop(['LI_3'], axis=1) 
+
+# Spliting the dataset into training and testing
+X_train, X_test, y_train, y_test = train_test_split(X,Y, test_size=0.20) 
+
+# creating the black-box model instance
+GNB = GaussianNB() 
+
+# fitting the training set datasets
+GNB.fit(X_train, y_train) 
+
+# Assessing the model F1 and Accuracy matrix
+y_pred = GNB.predict(X_test)
+print(f"F1 Score {f1_score(y_test, y_pred, average='macro')}")
+print(f"Accuracy {accuracy_score(y_test, y_pred)}") 
+
+# Creating Dataset for DiFACE-SCM using DiCE library
+data_dice = dice_ml.Data (dataframe=df,
+                         # For perturbation strategy
+                         continuous_features=[], 
+                         outcome_name= 'LI_3')
+
+# Creating explainer for the GNB model
+GNB_dice = dice_ml.Model(model=GNB, 
+                        # There exist backends for tf, torch, ...
+                        backend="sklearn")
+
+# Generate CF based on the blackbox model for 10 data instances
+input_datapoint = X_test[0:10]
+
+exp = dice_ml.Dice(data_dice, 
+                         GNB_dice, 
+                         # Random sampling, genetic algorithm, kd-tree,...
+                         method="random")
+
+# enforcing non-causal constraints for the numeric variable
+permitted_range={'Q7':['5','6','7','8','9','10','11','12']}
+features_to_vary=['Treatment','Q4', 'Q5',
+       'Q6_0', 'Q6_1', 'Q6_2', 'Q6_3', 'Q7', 'Q8', 'Q9', 'Q10']
+continuous_features=['Q7']
+
+# Generating the counterfactuals
+dice_exp = exp.generate_counterfactuals(input_datapoint,
+                total_CFs=4, desired_class="opposite",
+                permitted_range=permitted_range,
+                features_to_vary=features_to_vary
+)
+
+
+# Visualizing the generated CFs
+dice_exp.visualize_as_dataframe(show_only_changes=True)

@@ -1,0 +1,92 @@
+# importing libraries
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+import dice_ml
+from sklearn.metrics import f1_score, accuracy_score
+
+# Importing SENSE-EGRA Dataset
+df = pd.read_csv("EGRA1.csv") 
+
+# checking columns for NAs in the dataset
+df.isnull().sum() 
+
+# dropping NAs columns from the dataset
+data = df.dropna()
+
+#crosschecking to see that all NAs columns are dropped
+data.isnull().sum() 
+
+# droping columns with students' ID
+df=data.drop(['Std_ID'], axis=1) 
+
+# creating a Binary class list for the outcome variable LI_3
+std_grade = [] 
+
+for LI_3 in df['LI_3']:
+    if LI_3 <=39:
+        std_grade.append('F')
+      
+    elif LI_3>=40:
+        std_grade.append('P')
+
+df['LI_3']=std_grade # replacing the outcome variable with the multiclass category created
+
+print(df.info()) # information checking for all variables
+
+df['LI_3'].unique() # checking to see the class is binary
+
+import matplotlib.pyplot as plt
+columns=df.columns # creating histogram to visualize the variables
+for col in columns:
+    print('col: ', col)
+    df[col].hist()
+    plt.show()
+
+Y =df['LI_3'].replace({'F': 0, 'P': 1}) # binarizing the outcome variable
+
+X =df.drop(['LI_3'], axis=1) # Creating inputs variables by droping columns with outcome variable
+
+X_train, X_test, y_train, y_test = train_test_split(X,Y, test_size=0.20) # Spliting the dataset into training and testing
+
+rf = RandomForestClassifier() # Creating an instance of the RF classifer model
+
+rf.fit(X_train, y_train) # fitting the training set dataset
+
+# Assessing the model F1 and Accuracy matrix
+y_pred = rf.predict(X_test)
+print(f"F1 Score {f1_score(y_test, y_pred, average='macro')}")
+print(f"Accuracy {accuracy_score(y_test, y_pred)}")
+
+# Passing the dataset for DiCE
+data_dice = dice_ml.Data (dataframe=df,
+                         # For perturbation strategy
+                        continuous_features=['Age', 'LI_1','LI_2'],
+                         outcome_name= 'LI_3')
+
+# Creating non-causal constraints
+permitted_range={'Q7':['5','6','7','8','9','10','11','12']}
+features_to_vary=['Treatment','Q4', 'Q5',
+       'Q6_0', 'Q6_1', 'Q6_2', 'Q6_3', 'Q7', 'Q8', 'Q9', 'Q10']
+
+# Passing the rf to DiCE
+rf_dice = dice_ml.Model(model=rf, 
+                        # There exist backends for tf, torch, ...
+                        backend="sklearn")
+
+# Creating explainer for rf
+explainer = dice_ml.Dice(data_dice, 
+                         rf_dice, 
+                         # Random sampling, genetic algorithm, kd-tree,...
+                         method="random")
+
+# Generate CF based on the blackbox model for 10 data instances
+input_datapoint = X_test[0:10]
+cf = explainer.generate_counterfactuals(input_datapoint, 
+                                  total_CFs=4, 
+                                  desired_class="opposite")
+
+# Visualize the CF
+cf.visualize_as_dataframe(show_only_changes=True)
+
